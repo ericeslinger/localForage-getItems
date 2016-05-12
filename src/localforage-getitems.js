@@ -86,29 +86,29 @@
                 var req = store.openCursor(keyRangeValue);
                 var result = {};
                 var i = 0;
-             
+
                 req.onsuccess = function (/*event*/) {
                     var cursor = req.result; // event.target.result;
-             
+
                     if (!cursor) {
                         resolve(result);
                         return;
                     }
-             
+
                     var key = cursor.key;
-             
+
                     while (key > set[i]) {
-             
+
                         // The cursor has passed beyond this key. Check next.
                         i++;
-             
+
                         if (i === set.length) {
                             // There is no next. Stop searching.
                             resolve(result);
                             return;
                         }
                     }
-             
+
                     if (key === set[i]) {
                         // The current cursor value should be included and we should continue
                         // a single step in case next item has the same key or possibly our
@@ -192,21 +192,23 @@
         if (localforageInstance &&
             typeof localforageInstance.getSerializer === 'function') {
             return localforageInstance.getSerializer();
+        } else {
+          throw new Error('This library requires localforage 1.3 or higher');
         }
 
-        var serializerPromise = new Promise(function(resolve/*, reject*/) {
-            // We allow localForage to be declared as a module or as a
-            // library available without AMD/require.js.
-            if (moduleType === ModuleType.DEFINE) {
-                require(['localforageSerializer'], resolve);
-            } else if (moduleType === ModuleType.EXPORT) {
-                // Making it browserify friendly
-                resolve(require('./../utils/serializer'));
-            } else {
-                resolve(globalObject.localforageSerializer);
-            }
-        });
-
+        // var serializerPromise = new Promise(function(resolve/*, reject*/) {
+        //     // We allow localForage to be declared as a module or as a
+        //     // library available without AMD/require.js.
+        //     if (moduleType === ModuleType.DEFINE) {
+        //         require(['localforageSerializer'], resolve);
+        //     } else if (moduleType === ModuleType.EXPORT) {
+        //         // Making it browserify friendly
+        //         resolve(require('./../utils/serializer'));
+        //     } else {
+        //         resolve(globalObject.localforageSerializer);
+        //     }
+        // });
+        //
         return serializerPromise.then(function(lib) {
             serializer = lib;
             return Promise.resolve(serializer);
